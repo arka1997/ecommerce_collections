@@ -78,4 +78,21 @@ public class Customer {
     public void setLoggedIn(boolean isLoggedIn) {
         this.isLoggedIn = isLoggedIn;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Customer{");
+        sb.append("customerId=").append(customerId);
+        sb.append(", name=").append(name);
+        sb.append(", email=").append(email);
+        sb.append(", mobile=").append(mobile);
+        sb.append(", address=").append(address);
+        sb.append(", password=").append(password);
+        sb.append(", isLoggedIn=").append(isLoggedIn);
+        sb.append('}');
+        return sb.toString();
+    }
+
+
 }

@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Objects;
+
 public class Cart {
 
     private int productId;
@@ -59,4 +61,38 @@ public class Cart {
     public void setTotalPrice(double totalPrice) {
         this.totalPrice = totalPrice;
     }
+
+    @Override
+    public String toString() {
+        return "Cart [productId=" + productId + ", productName=" + productName + ", price=" + price + ", quantity="
+                + quantity + ", totalPrice=" + totalPrice + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + this.productId;
+        hash = 53 * hash + Objects.hashCode(this.productName);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Cart other = (Cart) obj;
+        if (this.productId != other.productId) {
+            return false;
+        }
+        return Objects.equals(this.productName, other.productName);
+    }
+
+    
 }

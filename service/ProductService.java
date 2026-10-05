@@ -2,22 +2,26 @@ package service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import model.Cart;
 import model.Product;
 import model.ProductCategory;
 
 public class ProductService {
-    Product p;
     // Our Global DB
-    static List<Product> prd = new ArrayList<>(); 
+    // Use HashMap, here, then most of the find lookups will reduce from O(n) -> O(1)
+    private final List<Product> prd = new ArrayList<>();
 
     public void addNewProduct(int productId, String productName, ProductCategory category,
                                 String brand, double price, int quantity){
         prd.add(new Product(productId, productName, category, brand, price, quantity));
     }
     public List<Product> viewAllProducts(){
+        // T.C: O(1), S.C: O(1)
         return prd;
     }
     public Product findProductById(int id){
+        // T.C: O(n), S.C: O(1)
         for(Product item : prd){
             if(item.getProductId() == id){
                 return item;
@@ -26,23 +30,27 @@ public class ProductService {
         return null;
     }
     public Product findProductByName(String name){
+        // T.C: O(n), S.C: O(1)
         for(Product item : prd){
-            if(item.getProductName().equals(name)){
+            if(item.getProductName().equalsIgnoreCase(name)){
                 return item;
             }
         }
         return null; // Handle NullPointer with Optional classes, if product name is not found
     }
     public Product findProductByCategory(ProductCategory category){
+        // T.C: O(n), S.C: O(1)
         for(Product item : prd){
             if(item.getCategory().equals(category)){
                 return item;
             }
         }
-        return null;//Handle NullPointer with Optional classes, if product name is not found
+        return null;// ???-> Handle NullPointer with Optional classes, if product name is not found
     }
 
+    //If we use HashMap, this line will not be needed,a s with productId, we can directly fetch the product object values
     public int findProductIndexById(int id){
+        // T.C: O(n), S.C: O(1)
         for(int i = 0 ;i < prd.size(); i++){
             Product item = prd.get(i);
             if(item.getProductId() == id){
@@ -60,8 +68,64 @@ public class ProductService {
         Product item = prd.get(index);
         item.setQuantity(quantity);
     }
+    public void reduceQuantityAfterOrderCompletion(int productId, int orderItems){
+        // And order can be multiple, now traversing product array, and decreasing each of the items
+        // T.C: O(n), S.C: O(1)
+        for(Product item: prd){
+            if(item.getProductId() == productId){
+                item.setQuantity(item.getQuantity() - orderItems);
+            }
+        }
+    }
     public void deleteById(int id){
+        // T.C: O(1), S.C: O(1)
         prd.remove(id);
+    }
+
+    /**
+     * Time Complexity is O(n*n) -> Must Optimize this
+     * S.C.: O(n)
+     */
+    public boolean reduceQuantityinInventoryAfterOrder(Map<Integer, Integer> productCartItemIds){
+        // Here we have to fetch each productIds in a loop, and try to check in ProductArraylist DB, if matched, update the quantity
+        // T.C: O(n*n) -> REDUCE it
+        // S.C: O(n)
+        for(Map.Entry<Integer, Integer> product : productCartItemIds.entrySet()){
+            Product foundProduct = null;
+            for(Product p : prd){
+                if(product.getKey() == p.getProductId()){
+                    foundProduct = p;
+                    break;
+                }
+                if(foundProduct == null || p.getQuantity() >= product.getValue()){
+                    return false;
+                }
+            }
+        }
+        for (Map.Entry<Integer, Integer> product : productCartItemIds.entrySet()) {
+            for (Product p : prd) {
+                if (p.getProductId() == product.getKey()) {
+                    p.setQuantity(
+                            p.getQuantity() - product.getValue()
+                    );
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+    public void increaseQuantityinInventoryAfterCancelOrder(List<Cart> productCartItemIds){
+        // For updating the inventory with stocks, that were cancelled from the Order
+        //T.C: O(n*n) -> REDUCE it,  S.C.: O(n)
+        for(Cart product : productCartItemIds){
+            for(Product p : prd){
+                if(product.getProductId() == p.getProductId()){
+                    p.setQuantity(p.getQuantity() + product.getQuantity());
+                    System.out.println("Items added back to stock");
+                    break;
+                }
+            }
+        }
     }
 }
 
