@@ -1,5 +1,6 @@
 package service;
 
+import exception.ProductNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,25 +28,27 @@ public class ProductService {
                 return item;
             }
         }
-        return null;
+        throw new ProductNotFoundException("Product with " + id + " Not Found");
     }
-    public Product findProductByName(String name){
-        // T.C: O(n), S.C: O(1)
+    public List<Product> findProductByName(String name){
+        List<Product> searchResult = new ArrayList<>();
+        // T.C: O(n), S.C: O(n)
         for(Product item : prd){
-            if(item.getProductName().equalsIgnoreCase(name)){
-                return item;
+            if(item.getProductName().toLowerCase().contains(name.toLowerCase())){
+                searchResult.add(item);
             }
         }
-        return null; // Handle NullPointer with Optional classes, if product name is not found
+        return searchResult; // Handle NullPointer with Optional classes, if product name is not found
     }
-    public Product findProductByCategory(ProductCategory category){
+    public List<Product> findProductByCategory(ProductCategory category){
+        List<Product> searchResult = new ArrayList<>();
         // T.C: O(n), S.C: O(1)
         for(Product item : prd){
             if(item.getCategory().equals(category)){
-                return item;
+                searchResult.add(item);
             }
         }
-        return null;// ???-> Handle NullPointer with Optional classes, if product name is not found
+        throw new ProductNotFoundException("Product with " + category + " Not Found");
     }
 
     //If we use HashMap, this line will not be needed,a s with productId, we can directly fetch the product object values
@@ -97,7 +100,7 @@ public class ProductService {
                     foundProduct = p;
                     break;
                 }
-                if(foundProduct == null || p.getQuantity() >= product.getValue()){
+                if(foundProduct == null || p.getQuantity() < product.getValue()){
                     return false;
                 }
             }

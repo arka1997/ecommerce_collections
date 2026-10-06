@@ -1,10 +1,10 @@
 package service;
 
+import exception.InsufficientStockException;
 import java.util.*;
 import java.util.stream.Collectors;
 import model.Cart;
 import model.Product;
-
 public class CartService {
 
     ProductService servProduct;
@@ -17,49 +17,109 @@ public class CartService {
     Map<Integer, List<Cart>> cart = new HashMap<>();
     List<Cart> guestCart = new ArrayList<>();
 
-    public String addProductToGuestCart(int productId, int cartQuantity){
-        Product prd = servProduct.findProductById(productId);
-        if(verifyProductQuantity(cartQuantity, prd.getQuantity())){
-            double totalPrice = cartQuantity * prd.getPrice();
-            guestCart.add(new Cart(prd.getProductId(), prd.getProductName(), prd.getPrice(), cartQuantity, totalPrice));
-            return "Cart Item Added Successfully";
-        }
-        return "Cart Items is more then current Stocks";
-    }
     public boolean verifyProductQuantity(int cartQuantity, int availableProductStocks){
         return (cartQuantity <= availableProductStocks);
     }
-    public void moveGuestCartToCart(int customerId){
-        // Might happen when i deleted cart items, and then trying to place Order
-        if(guestCart.isEmpty()){
-            System.out.println("Please add Items to Cart");
-            return;
+    public String addProductToGuestCart(int productId, int cartQuantity){
+        Product prd = servProduct.findProductById(productId);
+        if(prd == null){
+            return "Product not found";
         }
-        List<Cart> movingCart = cart.computeIfAbsent(customerId, key -> new ArrayList<>());
-        movingCart.addAll(guestCart);
-        guestCart.clear();
+        if(cartQuantity <= 0){
+            throw new InsufficientStockException("Quantity must be greater than 0");
+        }
+        for(Cart c : guestCart){
+            if(productId == c.getProductId()){
+                int newQuantity = c.getQuantity() + cartQuantity;
+
+                if(verifyProductQuantity(newQuantity, prd.getQuantity())){
+                    return "Requested quantity exceeds available stock";
+                }
+                c.setQuantity(newQuantity);
+                c.setTotalPrice(newQuantity * c.getPrice());
+                return "Cart Item Added Successfully";
+            }
+        }
+            
+        if (!verifyProductQuantity(cartQuantity, prd.getQuantity())) {
+            return "Cart quantity is more than current stock";
+        }
+
+        double totalPrice = cartQuantity * prd.getPrice();
+        guestCart.add(new Cart(prd.getProductId(), prd.getProductName(), prd.getPrice(), cartQuantity, totalPrice));  
+        return "Cart Items is more then current Stocks";
     }
+    public void moveGuestCartToCart(int customerId) {
+
+    if (guestCart.isEmpty()) {
+        System.out.println("Please add Items to Cart");
+        return;
+    }
+
+    List<Cart> movingCustomerCart = cart.computeIfAbsent(customerId, key -> new ArrayList<>());
+
+    for (Cart guestItem : guestCart) {
+        boolean merged = false;
+        for (Cart customerItem : movingCustomerCart) {
+            if (customerItem.getProductId() == guestItem.getProductId()) {
+                int newQuantity = customerItem.getQuantity() + guestItem.getQuantity();
+                Product product = servProduct.findProductById(guestItem.getProductId());
+                if (product != null && newQuantity <= product.getQuantity()) {
+
+                    customerItem.setQuantity(newQuantity);
+                    customerItem.setTotalPrice(newQuantity * customerItem.getPrice());
+                }
+                merged = true;
+                break;
+            }
+        }
+        if (!merged) {
+            movingCustomerCart.add(guestItem);
+        }
+    }
+    guestCart.clear();
+}
     public List<Cart> viewGuestCart(){
         return guestCart;
     }
     // this will be called, when login is done, and all the items of guest cart will be added to the special map's cart with customerId
     public String addProductToCart(int customerId, int productId, int cartQuantity) {
-
+    // Here we are storing customer Id and There carts. iF customer Id is same, then the cart Item will be mapped to same customer
+    /**
+     * computeIfAbsent(customerId, key -> new ArrayList<>()) does two things:
+     * If customerId doesn't exist yet → creates a new ArrayList and stores it under that key.
+     * If customerId already exists → returns the existing list (no new key, no overwrite).
+     * Then .add(...) appends to that list.
+     */
         Product prd = servProduct.findProductById(productId);
-        if(verifyProductQuantity(cartQuantity, prd.getQuantity())){
-        // Here we are storing customer Id and There carts. iF customer Id is same, then the cart Item will be mapped to same customer
-        /**
-         * computeIfAbsent(customerId, key -> new ArrayList<>()) does two things:
-         * If customerId doesn't exist yet → creates a new ArrayList and stores it under that key.
-         * If customerId already exists → returns the existing list (no new key, no overwrite).
-         * Then .add(...) appends to that list.
-         */
-        List<Cart> compute = cart.computeIfAbsent(customerId, key -> new ArrayList<>());
-        double totalPrice = cartQuantity * prd.getPrice();
-        compute.add(new Cart(prd.getProductId(), prd.getProductName(), prd.getPrice(), cartQuantity, totalPrice));
-        return "Cart Item Added Successfully";
+
+        if (prd == null) {
+            return "Product not found";
         }
-        return "Cart Items is more then current Stocks";
+        if (cartQuantity <= 0) {
+            return "Quantity must be greater than 0";
+        }
+
+        List<Cart> customerCart = cart.computeIfAbsent(customerId, key -> new ArrayList<>());
+
+        // If Product already exists in customer's cart
+        for (Cart c : customerCart) {
+            if (c.getProductId() == productId) {
+                int newQuantity = c.getQuantity() + cartQuantity;
+                if (!verifyProductQuantity(newQuantity, prd.getQuantity())) {
+                    return "Requested quantity exceeds available stock";
+                }
+                c.setQuantity(newQuantity);
+                c.setTotalPrice(newQuantity * c.getPrice());
+                return "Cart Item Quantity Updated Successfully";
+            }
+        }
+        if (!verifyProductQuantity(cartQuantity, prd.getQuantity())) {
+            return "Cart quantity is more than current stock";
+        }
+        double totalPrice = cartQuantity * prd.getPrice();
+        customerCart.add(new Cart(prd.getProductId(), prd.getProductName(), prd.getPrice(), cartQuantity, totalPrice));  
+        return "Cart Item Added Successfully";
     }
     public List<Cart> viewCart(int customerId){
         if (customerId == -1){

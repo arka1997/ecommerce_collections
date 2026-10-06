@@ -1,5 +1,4 @@
 package mainDriver;
-
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -21,16 +20,14 @@ static Customer login = null;
         OrderService serveOrder = new OrderService(serv, cart);
         Scanner sc = new Scanner(System.in);
         boolean running = true;
-
         while (running) {
-            System.out.println("\n===== MAIN MENU =====");
+            System.out.println("\n╔════════════════════════════════╗");
+        System.out.println("🌿 ===== MAIN MENU ===== 🌿");
             System.out.println("1. Admin");
             System.out.println("2. Customer");
             System.out.println("3. Exit");
             System.out.print("Enter your choice: ");
-
             int option = sc.nextInt();
-            
             switch (option) {
                 case 1:
                     handleAdminMenu(sc, serv, servCustomer);
@@ -49,12 +46,11 @@ static Customer login = null;
         }
         sc.close();
     }
-
     private static void handleAdminMenu(Scanner sc, ProductService serv, CustomerService servCustomer) {
-        
         boolean adminRunning = true;
         while(adminRunning) {
-        System.out.println("\n===== ADMIN MENU =====");
+        System.out.println("\n╔════════════════════════════════╗");
+        System.out.println("🛠️ ===== ADMIN MENU ===== 🛠️");
         System.out.println("1. Add Product");
         System.out.println("2. View Products");
         System.out.println("3. Search Product By ID");
@@ -67,9 +63,7 @@ static Customer login = null;
         System.out.println("10. View All Orders");
         System.out.println("11. Exit");
         System.out.print("Enter your choice: ");
-        
         int opt = sc.nextInt();
-        
         switch (opt) {
             case 1:
                 if(serv.viewAllProducts() == null) {
@@ -80,20 +74,16 @@ static Customer login = null;
                 System.out.print("Enter Product ID: ");
                 int productId = sc.nextInt();
                 sc.nextLine(); // Consume newline
-
                 System.out.print("Enter Product Name: ");
                 String productName = sc.nextLine();
-
                 System.out.print("Enter Product Brand: ");
                 String brand = sc.nextLine();
-
                 System.out.print("Enter Product Price: ");
                 double price = sc.nextDouble();
-
                 System.out.print("Enter Available Quantity: ");
                 int quantity = sc.nextInt();
-
-                System.out.println("\n===== Product Category MENU =====");
+                System.out.println("\n────────────────────────────────");
+               System.out.println("🌱 ===== Product Category MENU ===== 🌱");
                 System.out.println("1. INDOOR");
                 System.out.println("2. OUTDOOR");
                 System.out.println("3. SUCCULENTS");
@@ -112,10 +102,8 @@ static Customer login = null;
                     default:
                         break;
                 }
-                
                 serv.addNewProduct(productId, productName, category, brand, price, quantity);
                 break;
-                
             case 2:
                 List<Product> list = serv.viewAllProducts();
                 if(list == null) {
@@ -124,21 +112,18 @@ static Customer login = null;
                     System.out.println(list);
                 }
                 break;
-                
             case 3:
                 System.out.println(serv.viewAllProducts());
                 System.out.println("Enter the Product ID from View List of Products");
                 int opt3 = sc.nextInt();
                 System.out.println(serv.findProductById(opt3));
                 break;
-                
             case 4:
                 System.out.println(serv.viewAllProducts());
                 System.out.println("Enter the Product Name from View List of Products");
                 String opt4 = sc.nextLine();
                 System.out.println(serv.findProductByName(opt4));
                 break;
-                
             case 5:
                 System.out.println("View All Products " + serv.viewAllProducts());
                 System.out.println("Enter the Product Category from View List of Products");
@@ -146,7 +131,6 @@ static Customer login = null;
                 ProductCategory selectedCategory = ProductCategory.valueOf(opt5.trim().toUpperCase());
                 System.out.println(serv.findProductByCategory(selectedCategory));
                 break;
-                
             case 6:
                 System.out.println("View All Products " + serv.viewAllProducts());
                 System.out.println("Tell item ID, for which you wanna Edit the Product Price");
@@ -157,7 +141,6 @@ static Customer login = null;
                 serv.updatePrice(id, opt7);
                 System.out.println("View All Products after Modification " + serv.viewAllProducts());
                 break;
-                
             case 7:
                 System.out.println("View All Products " + serv.viewAllProducts());
                 System.out.println("Tell item ID, for which you wanna Edit the Product Quantity");
@@ -168,7 +151,6 @@ static Customer login = null;
                 serv.updateQuantity(id2, opt9);
                 System.out.println("View All Products after Modification " + serv.viewAllProducts());
                 break;
-                
             case 8:
                 System.out.println("Before Deletion " + serv.viewAllProducts());
                 System.out.println("Tell item ID, for Deletion");
@@ -177,7 +159,6 @@ static Customer login = null;
                 serv.deleteById(id3);
                 System.out.println("After Deletion " + serv.viewAllProducts());
                 break;
-                
             case 9:
                 System.out.println("View All Customers " + servCustomer.viewAllCustomers());
                 break;
@@ -190,13 +171,12 @@ static Customer login = null;
         }
         }
     }
-
     private static void handleCustomerMenu(Scanner sc, ProductService serv, CustomerService servCustomer, CartService cart, OrderService serveOrder) {
          boolean customerRunning = true;
          while(customerRunning){
         // Keeping it here, instead at top, to save memory. Admin doesnot need cart service, Customer needs.
-        
-        System.out.println("\n===== CUSTOMER MENU =====");
+        System.out.println("\n╔════════════════════════════════╗");
+        System.out.println("🛒 ===== CUSTOMER MENU ===== 🛒");
         System.out.println("1. Register");
         System.out.println("2. Login");
         System.out.println("3. View Products");
@@ -212,34 +192,26 @@ static Customer login = null;
         System.out.println("13. Cancel Order");
         System.out.println("14. Logout");
         System.out.print("Enter your choice: ");
-
         int option = sc.nextInt();
         int productId = 0;
-
         switch(option){
             case 1:
-                System.out.println("\n--- Customer Registration ---");
+                System.out.println("\n────────────────────────────────");
+               System.out.println("👤 --- Customer Registration --- 👤");
                 System.out.println("View Existing customers" + servCustomer.viewAllCustomers());
-
                 System.out.print("Enter ID: ");
                 int id = sc.nextInt();// Reads only number, not enter. So when I press Enter after giving input, it skips the next fullName, thinking i have given it, and asks for email
                 sc.nextLine();
-
                 System.out.print("Enter Full Name: ");
                 String name = sc.nextLine();
-
                 System.out.print("Enter Email ID: ");
                 String email = sc.nextLine();
-
                 System.out.print("Enter Complete Address: ");
                 String address = sc.nextLine();
-
                 System.out.print("Enter Mobile Number: ");
                 String mobile = sc.nextLine(); // Using String for mobile prevents dropping leading zeros
-
                 System.out.print("Enter Password: ");
                 String password = sc.nextLine();
-
                 // Call your service method with the captured inputs
                 servCustomer.register(id, name, email, mobile, address, password);
                 System.out.println("Registration successful! You can now log in.");
@@ -258,7 +230,10 @@ static Customer login = null;
                 System.out.println(serv.viewAllProducts());
                 break;
             case 4:
-                System.out.println("Sir, Thank you for patience.....Searching needs to be unified with Admin, And using Comparator will be implemented");
+                System.out.println(serv.viewAllProducts());
+                System.out.println("Enter the Product Name from View List of Products");
+                String searchProductName = sc.nextLine();
+                System.out.println(serv.findProductByName(searchProductName));
             break;
             case 5: 
                 /** 
@@ -271,12 +246,10 @@ static Customer login = null;
                     System.out.println(productId + "products found");
                     break;
                 }
-                
                 System.out.println("Select the ProductId");
                 productId = sc.nextInt();
                 System.out.println("How many Quantity you want to add to Cart");
                 int cartQuantity = sc.nextInt();
-                
                 Product prd = serv.findProductById(productId);
                 String message = null;
                 if (login == null) {
@@ -295,7 +268,6 @@ static Customer login = null;
                 }
             break;
             case 7:
-
                 System.out.println("Select Product Item you want to remove from your cart");
                 productId = sc.nextInt();
                 List<Cart> listCart = null;
@@ -315,7 +287,6 @@ static Customer login = null;
                 } else {
                     listCartIncreaseItem = cart.increaseCartQuantity(login.getCustomerId(), productId);
                 }
-                
                 System.out.println("Your Cart Items: " + listCartIncreaseItem);
             break;
             case 9:
@@ -368,11 +339,9 @@ static Customer login = null;
             default:
                 System.out.println("Invalid choice. Please try again.");
             break;
-            
         }
         }
         // For Customer logimn, from Point 1. to Point 7, we dont need customers to be loggedIn.
         // But from Point 8, we have to fetch value of isLoggedIn, and keep a check if the customer is LoggedIn or not.
     }
-    
 }
